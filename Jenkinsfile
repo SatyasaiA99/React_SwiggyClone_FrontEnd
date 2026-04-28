@@ -99,11 +99,12 @@ pipeline {
                     kubectl apply -f Deployment.yml
                     kubectl apply -f Service.yml
 
-                    kubectl rollout status deployment/python-app-deployment
+                    kubectl rollout status deployment/react-app-deployment
                     '''
                 }
             }
         }
+}
 
     post {
         success {
@@ -113,4 +114,4 @@ pipeline {
             echo "❌ Pipeline failed. Check logs!"
         }
     }
-}
+
