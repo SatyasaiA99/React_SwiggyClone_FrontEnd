@@ -2,10 +2,8 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "react-swiggy-clone"
-        IMAGE_TAG = "latest"
-        CONTAINER_NAME = "react-app"
-        PORT = "3001"
+        IMAGE_NAME = "satyasaia99/react-swiggy-clone"   // 👈 DockerHub
+        IMAGE_TAG = "${BUILD_NUMBER}"                  // 👈 dynamic tag
         SONARQUBE_ENV = "sq"
 
         NEXUS_URL = "http://3.108.41.69:8081"
@@ -45,8 +43,7 @@ pipeline {
                         sh """
                         ${scannerHome}/bin/sonar-scanner \
                         -Dsonar.projectKey=e-swiggy \
-                        -Dsonar.sources=src \
-                        -Dsonar.sourceEncoding=UTF-8
+                        -Dsonar.sources=src
                         """
                     }
                 }
@@ -63,17 +60,23 @@ pipeline {
 
         stage('Package App') {
             steps {
-                sh 'zip -r app.zip .'
+                sh 'zip -r app.zip dist'
             }
         }
 
         stage('Upload to Nexus') {
             steps {
-                sh """
-                curl -u admin:admin123 \
-                --upload-file app.zip \
-                ${NEXUS_URL}/repository/${NEXUS_REPO}/app-v1.zip
-                """
+                withCredentials([usernamePassword(
+                    credentialsId: 'nexus-creds',
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS'
+                )]) {
+                    sh """
+                    curl -u $USER:$PASS \
+                    --upload-file app.zip \
+                    ${NEXUS_URL}/repository/${NEXUS_REPO}/app-${BUILD_NUMBER}.zip
+                    """
+                }
             }
         }
 
@@ -83,26 +86,34 @@ pipeline {
             }
         }
 
-        stage('Run Container') {
+        stage('Push Docker Image') {
             steps {
-                sh """
-                docker rm -f ${CONTAINER_NAME} || true
-                docker run -d -p ${PORT}:80 --name ${CONTAINER_NAME} ${IMAGE_NAME}:${IMAGE_TAG}
-                """
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-creds',
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS'
+                )]) {
+                    sh """
+                    echo $PASS | docker login -u $USER --password-stdin
+                    docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                    """
+                }
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-                    sh '''
+                    sh """
                     echo "🚀 Deploying to Kubernetes..."
 
-                    kubectl apply -f Deployment.yml
-                    kubectl apply -f Service.yml
+                    sed -i 's|IMAGE_PLACEHOLDER|${IMAGE_NAME}:${IMAGE_TAG}|g' deployment.yaml
+
+                    kubectl apply -f deployment.yaml
+                    kubectl apply -f service.yaml
 
                     kubectl rollout status deployment/react-app-deployment
-                    '''
+                    """
                 }
             }
         }
