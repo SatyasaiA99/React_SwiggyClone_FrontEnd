@@ -28,6 +28,26 @@ pipeline {
                 sh 'npm run build'
             }
         }
+        stage('SonarQube Analysis') {
+    steps {
+        withSonarQubeEnv("${SONARQUBE_ENV}") {
+            sh """
+                sonar-scanner \
+                -Dsonar.projectKey=e-swiggy \
+                -Dsonar.sources=src \
+                -Dsonar.sourceEncoding=UTF-8
+            """
+        }
+    }
+}
+
+stage('Quality Gate') {
+    steps {
+        timeout(time: 2, unit: 'MINUTES') {
+            waitForQualityGate abortPipeline: true
+        }
+    }
+}
 
         stage('Build Docker Image') {
             steps {
