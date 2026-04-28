@@ -102,8 +102,8 @@ pipeline {
                     echo "🚀 Deploying to Kubernetes..."
 
                     # Apply YAML (safe if already exists)
-                    kubectl apply -f Deployment.yaml
-                    kubectl apply -f Service.yaml
+                    kubectl apply -f Deployment.yml
+                    kubectl apply -f Service.yml
 
                     # 🔥 IMPORTANT: update image
                     kubectl set image deployment/react-app-deployment \
