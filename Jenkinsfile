@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "satyasaia99/react-swiggy-clone"   // 👈 DockerHub
-        IMAGE_TAG = "${BUILD_NUMBER}"                  // 👈 dynamic tag
+        IMAGE_NAME = "satyasaia99/react-swiggy-clone"
+        IMAGE_TAG = "${BUILD_NUMBER}"
         SONARQUBE_ENV = "sq"
 
         NEXUS_URL = "http://3.108.41.69:8081"
@@ -60,7 +60,7 @@ pipeline {
 
         stage('Package App') {
             steps {
-                sh 'zip -r app.zip .'
+                sh 'zip -r app.zip dist'
             }
         }
 
@@ -69,11 +69,10 @@ pipeline {
                 sh """
                 curl -u admin:admin123 \
                 --upload-file app.zip \
-                ${NEXUS_URL}/repository/${NEXUS_REPO}/app-v1.zip
+                ${NEXUS_URL}/repository/${NEXUS_REPO}/app-${BUILD_NUMBER}.zip
                 """
             }
         }
-
 
         stage('Build Docker Image') {
             steps {
@@ -99,18 +98,24 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-                sh '''
-                echo "🚀 Deploying to Kubernetes..."
+                    sh """
+                    echo "🚀 Deploying to Kubernetes..."
 
-                kubectl apply -f Deployment.yml
-                kubectl apply -f Service.yml
+                    # Apply YAML (safe if already exists)
+                    kubectl apply -f Deployment.yaml
+                    kubectl apply -f Service.yaml
 
-                kubectl rollout status deployment/react-app-deployment
-                '''
+                    # 🔥 IMPORTANT: update image
+                    kubectl set image deployment/react-app-deployment \
+                    react-container=${IMAGE_NAME}:${IMAGE_TAG}
+
+                    # Wait for rollout
+                    kubectl rollout status deployment/react-app-deployment
+                    """
+                }
             }
         }
     }
-}
 
     post {
         success {
