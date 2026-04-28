@@ -34,13 +34,10 @@ pipeline {
             }
         }
 
-
-        stage('Run New Container') {
+        stage('Run Container') {
             steps {
                 sh "docker run -d -p 3001:80 --name ${CONTAINER_NAME} ${IMAGE_NAME}:${IMAGE_TAG}"
             }
         }
-    }
-
     }
 }
