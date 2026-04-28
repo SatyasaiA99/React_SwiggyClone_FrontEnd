@@ -104,8 +104,8 @@ pipeline {
 
                     sed -i 's|IMAGE_PLACEHOLDER|${IMAGE_NAME}:${IMAGE_TAG}|g' deployment.yaml
 
-                    kubectl apply -f deployment.yaml
-                    kubectl apply -f service.yaml
+                    kubectl apply -f Deployment.yml
+                    kubectl apply -f Service.yml
 
                     kubectl rollout status deployment/react-app-deployment
                     """
