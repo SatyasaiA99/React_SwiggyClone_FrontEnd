@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: react-container
-        image: react-swiggy-clone:v1
+        image: react-swiggy-clone:latest
         ports:
         - containerPort: 80
