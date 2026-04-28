@@ -5,6 +5,7 @@ pipeline {
         IMAGE_NAME = "react-swiggy-clone"
         IMAGE_TAG = "latest"
         CONTAINER_NAME = "react-app"
+        PORT = "3001"
     }
 
     stages {
@@ -36,7 +37,10 @@ pipeline {
 
         stage('Run Container') {
             steps {
-                sh "docker run -d -p 3001:80 --name ${CONTAINER_NAME} ${IMAGE_NAME}:${IMAGE_TAG}"
+                sh """
+                docker rm -f ${CONTAINER_NAME} || true
+                docker run -d -p ${PORT}:80 --name ${CONTAINER_NAME} ${IMAGE_NAME}:${IMAGE_TAG}
+                """
             }
         }
     }
