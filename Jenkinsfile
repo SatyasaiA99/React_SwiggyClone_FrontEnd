@@ -99,20 +99,18 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-                    sh """
-                    echo "🚀 Deploying to Kubernetes..."
+                sh '''
+                echo "🚀 Deploying to Kubernetes..."
 
-                    sed -i 's|IMAGE_PLACEHOLDER|${IMAGE_NAME}:${IMAGE_TAG}|g' deployment.yaml
+                kubectl apply -f Deployment.yml
+                kubectl apply -f Service.yml
 
-                    kubectl apply -f Deployment.yml
-                    kubectl apply -f Service.yml
-
-                    kubectl rollout status deployment/react-app-deployment
-                    """
-                }
+                kubectl rollout status deployment/hotstar-deployment
+                '''
             }
         }
     }
+}
 
     post {
         success {
