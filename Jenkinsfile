@@ -6,6 +6,7 @@ pipeline {
         IMAGE_TAG = "latest"
         CONTAINER_NAME = "react-app"
         PORT = "3001"
+        SONARQUBE_ENV = "sq" 
     }
 
     stages {
