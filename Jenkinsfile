@@ -60,25 +60,20 @@ pipeline {
 
         stage('Package App') {
             steps {
-                sh 'zip -r app.zip dist'
+                sh 'zip -r app.zip .'
             }
         }
 
         stage('Upload to Nexus') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'nexus-creds',
-                    usernameVariable: 'USER',
-                    passwordVariable: 'PASS'
-                )]) {
-                    sh """
-                    curl -u $USER:$PASS \
-                    --upload-file app.zip \
-                    ${NEXUS_URL}/repository/${NEXUS_REPO}/app-${BUILD_NUMBER}.zip
-                    """
-                }
+                sh """
+                curl -u admin:admin123 \
+                --upload-file app.zip \
+                ${NEXUS_URL}/repository/${NEXUS_REPO}/app-v1.zip
+                """
             }
         }
+
 
         stage('Build Docker Image') {
             steps {
