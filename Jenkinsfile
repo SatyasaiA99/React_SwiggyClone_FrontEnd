@@ -10,7 +10,7 @@ pipeline {
     }
 
     tools {
-        nodejs 'nodejs'   // 👈 configure in Jenkins (Manage Jenkins → Tools)
+        nodejs 'node23'   // 👈 configure in Jenkins (Manage Jenkins → Tools)
     }
 
     stages {
