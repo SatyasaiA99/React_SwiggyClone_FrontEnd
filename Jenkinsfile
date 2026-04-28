@@ -13,7 +13,7 @@ pipeline {
     }
 
     tools {
-        nodejs 'node23'   // 👈 configure in Jenkins (Manage Jenkins → Tools)
+        nodejs 'node23'
     }
 
     stages {
@@ -60,11 +60,13 @@ pipeline {
                 }
             }
         }
+
         stage('Package App') {
             steps {
                 sh 'zip -r app.zip .'
             }
         }
+
         stage('Upload to Nexus') {
             steps {
                 sh """
@@ -89,8 +91,8 @@ pipeline {
                 """
             }
         }
-    }
-    stage('Deploy to Kubernetes') {
+
+        stage('Deploy to Kubernetes') {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                     sh '''
@@ -104,7 +106,7 @@ pipeline {
                 }
             }
         }
-}
+    }
 
     post {
         success {
@@ -114,4 +116,4 @@ pipeline {
             echo "❌ Pipeline failed. Check logs!"
         }
     }
-
+}
