@@ -34,12 +34,6 @@ pipeline {
             }
         }
 
-        stage('Stop Old Container') {
-            steps {
-                sh "docker stop ${CONTAINER_NAME} || true"
-                sh "docker rm ${CONTAINER_NAME} || true"
-            }
-        }
 
         stage('Run New Container') {
             steps {
@@ -48,12 +42,5 @@ pipeline {
         }
     }
 
-    post {
-        success {
-            echo "✅ Build & Deployment Successful"
-        }
-        failure {
-            echo "❌ Pipeline Failed"
-        }
     }
 }
