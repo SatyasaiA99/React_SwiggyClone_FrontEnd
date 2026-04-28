@@ -7,6 +7,9 @@ pipeline {
         CONTAINER_NAME = "react-app"
         PORT = "3001"
         SONARQUBE_ENV = "sq"
+
+        NEXUS_URL = "http://3.108.41.69:8081"
+        NEXUS_REPO = "Reactswiggy"
     }
 
     tools {
@@ -55,6 +58,20 @@ pipeline {
                 timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
+            }
+        }
+        stage('Package App') {
+            steps {
+                sh 'zip -r app.zip .'
+            }
+        }
+        stage('Upload to Nexus') {
+            steps {
+                sh """
+                curl -u admin:admin123 \
+                --upload-file app.zip \
+                ${NEXUS_URL}/repository/${NEXUS_REPO}/app-v1.zip
+                """
             }
         }
 
