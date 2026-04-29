@@ -6,7 +6,7 @@ pipeline {
         IMAGE_TAG = "${BUILD_NUMBER}"
         SONARQUBE_ENV = "sq"
 
-        NEXUS_URL = "http://3.108.41.69:8081"
+        NEXUS_URL = "http://52.66.211.159:8081"
         NEXUS_REPO = "Reactswiggy"
     }
 
